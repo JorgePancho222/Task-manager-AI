@@ -1,9 +1,10 @@
 // backend/src/routes/ai.js
-const express = require('router');
+import express from 'express';
+import aiService from '../services/aiService.js';
+import Task from '../models/Task.js';
+import authMiddleware from '../middleware/auth.js';
+
 const router = express.Router();
-const aiService = require('../services/aiService');
-const Task = require('../models/Task');
-const authMiddleware = require('../middleware/auth');
 
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
@@ -227,4 +228,5 @@ router.get('/health', async (req, res) => {
   }
 });
 
-module.exports = router;
+// CAMBIO IMPORTANTE: Usar export default en lugar de module.exports
+export default router;

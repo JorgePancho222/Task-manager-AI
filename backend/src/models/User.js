@@ -1,6 +1,6 @@
 // backend/src/models/User.js
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
 
 // Hash password antes de guardar
 userSchema.pre('save', async function(next) {
-  // Solo hashear si la contraseña fue modificada
   if (!this.isModified('password')) {
     return next();
   }
@@ -64,7 +63,5 @@ userSchema.methods.toJSON = function() {
   return userObject;
 };
 
-module.exports = mongoose.model('User', userSchema);
-
-// ============================================
-// ============================================
+// SOLUCIÓN DEFINITIVA - Solo esta línea al final
+export default mongoose.models.User || mongoose.model('User', userSchema);

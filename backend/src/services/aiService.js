@@ -1,5 +1,5 @@
 // backend/src/services/aiService.js
-const axios = require('axios');
+import axios from 'axios';
 
 class AIService {
   constructor() {
@@ -295,7 +295,7 @@ Las subtareas deben dividir el trabajo en pasos lógicos y secuenciales.`;
       } else if (completionRate >= 60) {
         recommendation = '👍 Buen progreso. Estás completando la mayoría de tus tareas. Intenta enfocarte en terminar las pendientes antes de agregar nuevas.';
       } else if (completionRate >= 40) {
-        recommendation = '💪 Hay margen de mejora. Considera reducir el número de tareas activas y enfócate en completar las existentes primero.';
+        recommendation = '💪 Hay margen de mejora. Considera reducir el número de tareas activas y enfócarte en completar las existentes primero.';
       } else if (total > 0) {
         recommendation = '🎯 Enfócate en finalizar. Tienes muchas tareas pendientes. Prioriza 2-3 tareas importantes y termínalas antes de continuar.';
       } else {
@@ -327,7 +327,5 @@ Las subtareas deben dividir el trabajo en pasos lógicos y secuenciales.`;
   }
 }
 
-module.exports = new AIService();
-
-// ============================================
-// ============================================
+// CAMBIO IMPORTANTE: Usar export default en lugar de module.exports
+export default new AIService();

@@ -1,8 +1,8 @@
 // backend/src/server.js
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -20,11 +20,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('✅ MongoDB conectado'))
 .catch(err => console.error('❌ Error de MongoDB:', err));
 
-// Routes
-const authRoutes = require('./routes/auth');
-const taskRoutes = require('./routes/tasks');
-const aiRoutes = require('./routes/ai');
+// Importar rutas con import
+import authRoutes from './routes/auth.js';
+import taskRoutes from './routes/tasks.js';
+import aiRoutes from './routes/ai.js';
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/ai', aiRoutes);

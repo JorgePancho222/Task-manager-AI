@@ -1,0 +1,37 @@
+{
+  "name": "taskmaster-backend",
+  "version": "1.0.0",
+  "description": "Backend para TaskMaster AI - Sistema de gestión de tareas con IA",
+  "main": "src/server.js",
+  "type": "module",
+"scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "build": "echo 'No build step needed for Node.js'"
+  },
+  "keywords": [
+    "task-management",
+    "ai",
+    "productivity",
+    "express",
+    "mongodb"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.2",
+    "openai": "^4.104.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

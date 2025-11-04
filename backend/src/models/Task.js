@@ -1,5 +1,5 @@
 // backend/src/models/Task.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const subtaskSchema = new mongoose.Schema({
   title: {
@@ -91,7 +91,7 @@ const taskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'El usuario es requerido'],
-    index: true // Índice para mejorar queries
+    index: true
   },
   createdAt: {
     type: Date,
@@ -120,7 +120,7 @@ taskSchema.pre('save', function(next) {
   next();
 });
 
-// Índices compuestos para optimizar queries frecuentes
+// Índices compuestos
 taskSchema.index({ userId: 1, status: 1 });
 taskSchema.index({ userId: 1, priority: 1 });
 taskSchema.index({ userId: 1, createdAt: -1 });
@@ -146,4 +146,5 @@ taskSchema.virtual('isOverdue').get(function() {
 taskSchema.set('toJSON', { virtuals: true });
 taskSchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.model('Task', taskSchema);
+// SOLUCIÓN DEFINITIVA - Solo esta línea al final
+export default mongoose.models.Task || mongoose.model('Task', taskSchema);
