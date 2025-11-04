@@ -9,7 +9,26 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+// Configuración de CORS para producción
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://task-manager-ai-sigma.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite requests sin 'origin' (como apps móviles o Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      console.log('CORS bloqueado para:', origin);
+      return callback(new Error('Origen no permitido por CORS'), false);
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // MongoDB Connection
