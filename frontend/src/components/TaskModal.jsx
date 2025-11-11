@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const PRIORITY_OPTIONS = [
   { value: 'baja', label: 'Baja', color: 'text-green-600 bg-green-50' },
@@ -98,9 +98,9 @@ export default function TaskModal({ task, onClose, onSave }) {
 
       let response;
       if (isEditing) {
-        response = await axios.put(`${API_URL}/tasks/${task._id}`, payload);
+        response = await axios.put(`${API_URL}/api/tasks/${task._id}`, payload);
       } else {
-        response = await axios.post(`${API_URL}/tasks`, payload);
+        response = await axios.post(`${API_URL}/api/tasks`, payload);
       }
 
       if (response.data.success) {
@@ -122,7 +122,7 @@ export default function TaskModal({ task, onClose, onSave }) {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/ai/analyze-task`, {
+      const response = await axios.post(`${API_URL}/api/ai/analyze-task`, {
         title: formData.title,
         description: formData.description
       });
