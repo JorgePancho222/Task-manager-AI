@@ -79,25 +79,32 @@ export default function Tasks() {
   };
 
   const applyAIAnalysis = async (taskId, analysis) => {
-    try {
-      await axios.put(`${API_URL}/api/tasks/${taskId}`, {
+  try {
+    // VALIDACIÓN: Asegurar que taskId sea válido
+    if (!taskId || taskId === 'undefined') {
+      alert('Error: No se puede identificar la tarea. Por favor, actualiza la página.');
+      return;
+    }
+
+    await axios.put(`${API_URL}/api/tasks/${taskId}`, {
+      priority: analysis.priority,
+      estimatedTime: analysis.estimatedTime,
+      aiSuggestions: {
         priority: analysis.priority,
         estimatedTime: analysis.estimatedTime,
-        aiSuggestions: {
-          priority: analysis.priority,
-          estimatedTime: analysis.estimatedTime,
-          tips: analysis.tips
-        },
-        subtasks: analysis.subtasks.map(title => ({ title, completed: false }))
-      });
-      setIsAIModalOpen(false);
-      setAiAnalysis(null);
-      loadTasks();
-    } catch (error) {
-      console.error('Error al aplicar análisis:', error);
-      alert('Error al aplicar análisis');
-    }
-  };
+        tips: analysis.tips
+      },
+      subtasks: analysis.subtasks.map(title => ({ title, completed: false }))
+    });
+    
+    setIsAIModalOpen(false);
+    setAiAnalysis(null);
+    loadTasks();
+  } catch (error) {
+    console.error('Error al aplicar análisis:', error);
+    alert('Error al aplicar análisis: ' + (error.response?.data?.message || 'ID de tarea inválido'));
+  }
+};
 
   const getPriorityColor = (priority) => {
     const colors = {
