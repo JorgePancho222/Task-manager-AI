@@ -1,4 +1,3 @@
-// backend/src/server.js
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -8,27 +7,14 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-// Configuración de CORS para producción
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://task-manager-ai-sigma.vercel.app'
-];
-
+// Middleware - CORS MÁS PERMISIVO TEMPORALMENTE
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permite requests sin 'origin' (como apps móviles o Postman)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    } else {
-      console.log('CORS bloqueado para:', origin);
-      return callback(new Error('Origen no permitido por CORS'), false);
-    }
-  },
-  credentials: true
+  origin: ['http://localhost:5173', 'https://task-manager-ai-sigma.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 
 // MongoDB Connection
