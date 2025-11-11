@@ -1,14 +1,27 @@
+// frontend/src/components/AIAnalysisModal.jsx
 import { useState } from 'react';
 
 export default function AIAnalysisModal({ analysis, taskId, onClose, onApply }) {
   const [applying, setApplying] = useState(false);
 
+  // Debug log
+  console.log('🔍 AIAnalysisModal - taskId:', taskId);
+
   if (!analysis) return null;
 
   const handleApply = async () => {
+    if (!taskId) {
+      console.error('❌ taskId no disponible en el modal');
+      alert('Error: No se puede identificar la tarea. Por favor, actualiza la página.');
+      return;
+    }
+
     setApplying(true);
     try {
+      console.log('🔄 Aplicando análisis para taskId:', taskId);
       await onApply(taskId);
+    } catch (error) {
+      console.error('❌ Error en handleApply:', error);
     } finally {
       setApplying(false);
     }
@@ -129,7 +142,7 @@ export default function AIAnalysisModal({ analysis, taskId, onClose, onApply }) 
           </button>
           <button
             onClick={handleApply}
-            disabled={applying}
+            disabled={applying || !taskId}
             className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {applying ? (
