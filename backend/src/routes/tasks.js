@@ -84,9 +84,6 @@ router.post('/', async (req, res) => {
 
     await task.save();
 
-    // Popular el usuario para la respuesta
-    await task.populate('userId', 'name email');
-
     res.status(201).json({
       success: true,
       message: 'Tarea creada exitosamente',
@@ -115,14 +112,11 @@ router.post('/', async (req, res) => {
 // @access  Private
 router.get('/stats/summary', async (req, res) => {
   try {
-    // Convertir req.userId a ObjectId si es necesario
-    const userId = req.userId;
+    const userId = new mongoose.Types.ObjectId(req.userId);
 
     const stats = await Task.aggregate([
       { 
-        $match: { 
-          userId: new mongoose.Types.ObjectId(userId)
-        } 
+        $match: { userId } 
       },
       {
         $group: {
@@ -147,14 +141,6 @@ router.get('/stats/summary', async (req, res) => {
             $sum: {
               $cond: [{ $eq: ['$priority', 'urgente'] }, 1, 0]
             }
-          },
-          high: {
-            $sum: {
-              $cond: [{ $eq: ['$priority', 'alta'] }, 1, 0]
-            }
-          },
-          totalEstimatedTime: {
-            $sum: '$estimatedTime'
           }
         }
       }
@@ -165,29 +151,13 @@ router.get('/stats/summary', async (req, res) => {
       completed: 0, 
       pending: 0, 
       inProgress: 0, 
-      urgent: 0,
-      high: 0,
-      totalEstimatedTime: 0
+      urgent: 0
     };
-
-    // Calcular porcentaje de completado
-    const completionRate = result.total > 0 
-      ? Math.round((result.completed / result.total) * 100) 
-      : 0;
-
-    // Calcular tiempo promedio por tarea
-    const averageTime = result.total > 0 
-      ? Math.round(result.totalEstimatedTime / result.total)
-      : 0;
 
     res.json({
       success: true,
       data: { 
-        stats: {
-          ...result,
-          completionRate,
-          averageTime
-        }
+        stats: result
       }
     });
   } catch (error) {
@@ -195,51 +165,6 @@ router.get('/stats/summary', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Error al obtener estadísticas' 
-    });
-  }
-});
-
-// @route   GET /api/tasks/stats/productivity
-// @desc    Obtener métricas de productividad
-// @access  Private
-router.get('/stats/productivity', async (req, res) => {
-  try {
-    const userId = req.userId;
-    
-    // Obtener tareas de los últimos 7 días
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const productivityStats = await Task.aggregate([
-      {
-        $match: {
-          userId: new mongoose.Types.ObjectId(userId),
-          createdAt: { $gte: sevenDaysAgo }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
-          },
-          tasksCreated: { $sum: 1 },
-          tasksCompleted: {
-            $sum: { $cond: [{ $eq: ["$status", "completada"] }, 1, 0] }
-          }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    res.json({
-      success: true,
-      data: { productivityStats }
-    });
-  } catch (error) {
-    console.error('[TASKS ERROR] Error en estadísticas de productividad:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener estadísticas de productividad'
     });
   }
 });
@@ -381,5 +306,4 @@ router.patch('/:id/toggle', async (req, res) => {
   }
 });
 
-// CAMBIO IMPORTANTE: Usar export default en lugar de module.exports
 export default router;
