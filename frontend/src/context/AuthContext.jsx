@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
   // Cargar usuario actual
   const loadUser = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/me`);
+      const response = await axios.get(`${API_URL}/api/auth/me`);
       if (response.data.success) {
         setUser(response.data.data.user);
       }
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
   // Login
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password
       });
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
   // Register
   const register = async (name, email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, {
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         name,
         email,
         password
