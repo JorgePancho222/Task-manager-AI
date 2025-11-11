@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -27,25 +28,69 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
+      console.log('🔍 Cargando datos del dashboard...');
+      
       // Cargar estadísticas
-      const statsResponse = await axios.get(`${API_URL}/tasks/stats/summary`);
+      const statsResponse = await axios.get(`${API_URL}/api/tasks/stats/summary`);
+      console.log('📊 Stats response:', statsResponse.data);
       if (statsResponse.data.success) {
         setStats(statsResponse.data.data.stats);
       }
 
       // Cargar tareas recientes
-      const tasksResponse = await axios.get(`${API_URL}/tasks?status=all`);
+      const tasksResponse = await axios.get(`${API_URL}/api/tasks?status=all`);
+      console.log('📝 Tasks response:', tasksResponse.data);
       if (tasksResponse.data.success) {
         setRecentTasks(tasksResponse.data.data.tasks.slice(0, 5));
       }
 
       // Cargar insights de IA
-      const insightsResponse = await axios.get(`${API_URL}/ai/insights`);
-      if (insightsResponse.data.success) {
-        setInsights(insightsResponse.data.data.insights);
+      try {
+        const insightsResponse = await axios.get(`${API_URL}/api/ai/insights`);
+        console.log('🤖 Insights response:', insightsResponse.data);
+        if (insightsResponse.data.success) {
+          setInsights(insightsResponse.data.data.insights);
+        }
+      } catch (insightsError) {
+        console.log('⚠️ Insights no disponibles, usando datos locales');
+        // Si fallan los insights, usar datos locales
+        if (statsResponse.data.success) {
+          const localStats = statsResponse.data.data.stats;
+          setInsights({
+            recommendation: "¡Bienvenido a TaskMaster AI! Comienza creando tus primeras tareas.",
+            completionRate: localStats.total > 0 ? Math.round((localStats.completed / localStats.total) * 100) : 0,
+            averageTaskTime: 30
+          });
+        }
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('❌ Error loading dashboard data:', error);
+      // Fallback: cargar datos básicos desde las tareas
+      try {
+        const tasksResponse = await axios.get(`${API_URL}/api/tasks?status=all`);
+        if (tasksResponse.data.success) {
+          const tasks = tasksResponse.data.data.tasks;
+          setRecentTasks(tasks.slice(0, 5));
+          
+          // Calcular estadísticas locales
+          const localStats = {
+            total: tasks.length,
+            completed: tasks.filter(t => t.status === 'completada').length,
+            pending: tasks.filter(t => t.status === 'pendiente').length,
+            inProgress: tasks.filter(t => t.status === 'en_progreso').length,
+            urgent: tasks.filter(t => t.priority === 'urgente').length
+          };
+          setStats(localStats);
+          
+          setInsights({
+            recommendation: "¡Gestiona tus tareas eficientemente con TaskMaster AI!",
+            completionRate: localStats.total > 0 ? Math.round((localStats.completed / localStats.total) * 100) : 0,
+            averageTaskTime: 45
+          });
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback también falló:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -98,7 +143,7 @@ export default function Dashboard() {
         {/* Header de Bienvenida */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ¡Hola, {user?.name}! 👋
+            ¡Hola, {user?.name || 'Usuario'}! 👋
           </h1>
           <p className="text-gray-600">
             Aquí tienes un resumen de tu productividad
