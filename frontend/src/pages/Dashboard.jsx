@@ -28,19 +28,19 @@ export default function Dashboard() {
       setLoading(true);
       
       // Cargar estadísticas
-      const statsResponse = await axios.get(`${API_URL}/tasks/stats/summary`);
+      const statsResponse = await axios.get(`${API_URL}/api/tasks/stats/summary`);
       if (statsResponse.data.success) {
         setStats(statsResponse.data.data.stats);
       }
 
       // Cargar tareas recientes
-      const tasksResponse = await axios.get(`${API_URL}/tasks?status=all`);
+      const tasksResponse = await axios.get(`${API_URL}/api/tasks?status=all`);
       if (tasksResponse.data.success) {
         setRecentTasks(tasksResponse.data.data.tasks.slice(0, 5));
       }
 
       // Cargar insights de IA
-      const insightsResponse = await axios.get(`${API_URL}/ai/insights`);
+      const insightsResponse = await axios.get(`${API_URL}/api/ai/insights`);
       if (insightsResponse.data.success) {
         setInsights(insightsResponse.data.data.insights);
       }
