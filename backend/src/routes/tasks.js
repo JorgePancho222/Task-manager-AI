@@ -174,6 +174,14 @@ router.get('/stats/summary', async (req, res) => {
 // @access  Private
 router.put('/:id', async (req, res) => {
   try {
+    // VALIDACIÓN CRÍTICA: Verificar que el ID sea válido
+    if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+
     const {
       title,
       description,
@@ -224,6 +232,13 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     console.error('[TASKS ERROR] Error al actualizar tarea:', error);
     
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+    
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({ 
@@ -244,6 +259,14 @@ router.put('/:id', async (req, res) => {
 // @access  Private
 router.delete('/:id', async (req, res) => {
   try {
+    // VALIDACIÓN CRÍTICA: Verificar que el ID sea válido
+    if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+
     const task = await Task.findOne({ 
       _id: req.params.id, 
       userId: req.userId 
@@ -264,6 +287,14 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('[TASKS ERROR] Error al eliminar tarea:', error);
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+    
     res.status(500).json({ 
       success: false, 
       message: 'Error al eliminar tarea' 
@@ -276,6 +307,14 @@ router.delete('/:id', async (req, res) => {
 // @access  Private
 router.patch('/:id/toggle', async (req, res) => {
   try {
+    // VALIDACIÓN CRÍTICA: Verificar que el ID sea válido
+    if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+
     const task = await Task.findOne({ 
       _id: req.params.id, 
       userId: req.userId 
@@ -298,7 +337,15 @@ router.patch('/:id/toggle', async (req, res) => {
       data: { task }
     });
   } catch (error) {
-    console.error('[TASKS ERROR] Error al alternar estado:', error);
+    console.error('[TASKS ERROR] Error al actualizar tarea:', error);
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'ID de tarea inválido' 
+      });
+    }
+
     res.status(500).json({ 
       success: false, 
       message: 'Error al actualizar tarea' 
