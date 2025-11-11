@@ -16,6 +16,11 @@ export default function Tasks() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
 
+  // Debug logs
+  console.log('🔄 Tasks component rendered');
+  console.log('🔍 selectedTask:', selectedTask);
+  console.log('🔍 API_URL:', API_URL);
+
   useEffect(() => {
     loadTasks();
   }, [filter]);
@@ -66,45 +71,57 @@ export default function Tasks() {
 
   const handleAIAnalysis = async (task) => {
     try {
+      console.log('🔍 Iniciando análisis IA para tarea:', task._id);
       setIsAIModalOpen(true);
+      setSelectedTask(task); // ← CRÍTICO: Establecer la tarea seleccionada
+      
       const response = await axios.post(`${API_URL}/api/ai/analyze-task`, {
         title: task.title,
         description: task.description
       });
       setAiAnalysis(response.data.data.analysis);
+      console.log('✅ Análisis IA completado');
     } catch (error) {
-      console.error('Error al analizar con IA:', error);
+      console.error('❌ Error al analizar con IA:', error);
       alert('Error al analizar tarea con IA');
+      setIsAIModalOpen(false);
+      setSelectedTask(null);
     }
   };
 
   const applyAIAnalysis = async (taskId, analysis) => {
-  try {
-    // VALIDACIÓN: Asegurar que taskId sea válido
-    if (!taskId || taskId === 'undefined') {
-      alert('Error: No se puede identificar la tarea. Por favor, actualiza la página.');
-      return;
-    }
+    try {
+      // VALIDACIÓN MEJORADA
+      if (!taskId) {
+        console.error('❌ taskId es null/undefined:', taskId);
+        alert('Error: No se puede identificar la tarea. Por favor, actualiza la página.');
+        return;
+      }
 
-    await axios.put(`${API_URL}/api/tasks/${taskId}`, {
-      priority: analysis.priority,
-      estimatedTime: analysis.estimatedTime,
-      aiSuggestions: {
+      console.log('🔍 Aplicando análisis para taskId:', taskId);
+      
+      await axios.put(`${API_URL}/api/tasks/${taskId}`, {
         priority: analysis.priority,
         estimatedTime: analysis.estimatedTime,
-        tips: analysis.tips
-      },
-      subtasks: analysis.subtasks.map(title => ({ title, completed: false }))
-    });
-    
-    setIsAIModalOpen(false);
-    setAiAnalysis(null);
-    loadTasks();
-  } catch (error) {
-    console.error('Error al aplicar análisis:', error);
-    alert('Error al aplicar análisis: ' + (error.response?.data?.message || 'ID de tarea inválido'));
-  }
-};
+        aiSuggestions: {
+          priority: analysis.priority,
+          estimatedTime: analysis.estimatedTime,
+          tips: analysis.tips
+        },
+        subtasks: analysis.subtasks.map(title => ({ title, completed: false }))
+      });
+      
+      setIsAIModalOpen(false);
+      setAiAnalysis(null);
+      setSelectedTask(null); // ← LIMPIAR después de usar
+      loadTasks();
+      
+      console.log('✅ Análisis aplicado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al aplicar análisis:', error);
+      alert('Error al aplicar análisis: ' + (error.response?.data?.message || 'Intenta nuevamente'));
+    }
+  };
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -313,10 +330,11 @@ export default function Tasks() {
       {isAIModalOpen && aiAnalysis && (
         <AIAnalysisModal
           analysis={aiAnalysis}
-          taskId={selectedTask?._id}
+          taskId={selectedTask?._id} // ← Pasar el ID correcto
           onClose={() => {
             setIsAIModalOpen(false);
             setAiAnalysis(null);
+            setSelectedTask(null);
           }}
           onApply={(taskId) => applyAIAnalysis(taskId, aiAnalysis)}
         />
