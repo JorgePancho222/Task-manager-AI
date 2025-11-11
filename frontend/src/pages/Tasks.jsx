@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import TaskModal from '../components/TaskModal';
 import AIAnalysisModal from '../components/AIAnalysisModal';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
