@@ -23,7 +23,7 @@ export default function Tasks() {
   const loadTasks = async () => {
     try {
       const params = filter !== 'all' ? { status: filter } : {};
-      const response = await axios.get(`${API_URL}/tasks`, { params });
+      const response = await axios.get(`${API_URL}/api/tasks`, { params });
       setTasks(response.data.data.tasks);
     } catch (error) {
       console.error('Error al cargar tareas:', error);
@@ -46,7 +46,7 @@ export default function Tasks() {
     if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
 
     try {
-      await axios.delete(`${API_URL}/tasks/${taskId}`);
+      await axios.delete(`${API_URL}/api/tasks/${taskId}`);
       loadTasks();
     } catch (error) {
       console.error('Error al eliminar tarea:', error);
@@ -57,7 +57,7 @@ export default function Tasks() {
   const handleToggleStatus = async (task) => {
     try {
       const newStatus = task.status === 'completada' ? 'pendiente' : 'completada';
-      await axios.put(`${API_URL}/tasks/${task._id}`, { status: newStatus });
+      await axios.put(`${API_URL}/api/tasks/${task._id}`, { status: newStatus });
       loadTasks();
     } catch (error) {
       console.error('Error al actualizar estado:', error);
@@ -67,7 +67,7 @@ export default function Tasks() {
   const handleAIAnalysis = async (task) => {
     try {
       setIsAIModalOpen(true);
-      const response = await axios.post(`${API_URL}/ai/analyze-task`, {
+      const response = await axios.post(`${API_URL}/api/ai/analyze-task`, {
         title: task.title,
         description: task.description
       });
@@ -80,7 +80,7 @@ export default function Tasks() {
 
   const applyAIAnalysis = async (taskId, analysis) => {
     try {
-      await axios.put(`${API_URL}/tasks/${taskId}`, {
+      await axios.put(`${API_URL}/api/tasks/${taskId}`, {
         priority: analysis.priority,
         estimatedTime: analysis.estimatedTime,
         aiSuggestions: {
