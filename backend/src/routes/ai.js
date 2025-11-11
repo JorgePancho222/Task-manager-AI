@@ -69,13 +69,39 @@ router.post('/analyze-task', async (req, res) => {
 // @access  Private
 router.get('/insights', async (req, res) => {
   try {
-    console.log(`[AI] Usuario ${req.userId} solicitó insights de productividad`);
+    const userId = req.userId;
 
     // Obtener todas las tareas del usuario
-    const tasks = await Task.find({ userId: req.userId });
+    const tasks = await Task.find({ userId });
 
-    // Generar insights
-    const insights = await aiService.generateProductivityInsights(tasks);
+    // Calcular estadísticas básicas
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.status === 'completada').length;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    
+    // Calcular tiempo promedio (usando estimatedTime o valor predeterminado)
+    const totalEstimatedTime = tasks.reduce((sum, task) => sum + (task.estimatedTime || 30), 0);
+    const averageTaskTime = totalTasks > 0 ? Math.round(totalEstimatedTime / totalTasks) : 30;
+
+    // Generar recomendación basada en estadísticas
+    let recommendation = "¡Comienza creando tu primera tarea!";
+    if (totalTasks > 0) {
+      if (completionRate >= 80) {
+        recommendation = "¡Excelente trabajo! Tu tasa de finalización es impresionante.";
+      } else if (completionRate >= 50) {
+        recommendation = "Vas por buen camino. Enfócate en las tareas pendientes para mejorar tu productividad.";
+      } else {
+        recommendation = "Te recomendamos priorizar las tareas urgentes y establecer tiempos realistas.";
+      }
+    }
+
+    const insights = {
+      recommendation,
+      completionRate,
+      averageTaskTime,
+      totalTasks,
+      completedTasks
+    };
 
     res.json({
       success: true,
@@ -146,87 +172,4 @@ router.post('/suggest-priority', async (req, res) => {
   }
 });
 
-// @route   POST /api/ai/batch-analyze
-// @desc    Analizar múltiples tareas en lote
-// @access  Private
-router.post('/batch-analyze', async (req, res) => {
-  try {
-    const { tasks } = req.body;
-
-    if (!Array.isArray(tasks) || tasks.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Se requiere un array de tareas' 
-      });
-    }
-
-    if (tasks.length > 10) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Máximo 10 tareas por lote' 
-      });
-    }
-
-    const analyses = await Promise.all(
-      tasks.map(async (task) => {
-        try {
-          const analysis = await aiService.analyzeTask(task.title, task.description);
-          return {
-            title: task.title,
-            ...analysis
-          };
-        } catch (error) {
-          return {
-            title: task.title,
-            error: 'Error en análisis'
-          };
-        }
-      })
-    );
-
-    res.json({
-      success: true,
-      data: { analyses }
-    });
-  } catch (error) {
-    console.error('[AI ERROR] Error en análisis por lotes:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al analizar tareas' 
-    });
-  }
-});
-
-// @route   GET /api/ai/health
-// @desc    Verificar estado del servicio de IA
-// @access  Private
-router.get('/health', async (req, res) => {
-  try {
-    const provider = process.env.AI_PROVIDER || 'fallback';
-    const isConfigured = !!(
-      process.env.OPENAI_API_KEY || 
-      process.env.COHERE_API_KEY || 
-      process.env.GEMINI_API_KEY
-    );
-
-    res.json({
-      success: true,
-      data: {
-        provider,
-        configured: isConfigured,
-        status: isConfigured ? 'operational' : 'fallback mode',
-        message: isConfigured 
-          ? `Servicio de IA funcionando con ${provider}`
-          : 'Sin API key configurada, usando análisis básico'
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al verificar servicio de IA' 
-    });
-  }
-});
-
-// CAMBIO IMPORTANTE: Usar export default en lugar de module.exports
 export default router;
